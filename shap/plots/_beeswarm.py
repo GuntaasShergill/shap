@@ -363,7 +363,7 @@ def beeswarm(
     # build our y-tick labels
     yticklabels = [feature_names[i] for i in feature_inds]
     if include_grouped_remaining:
-        yticklabels[-1] = f"Sum of {num_cut} other features"
+        yticklabels[-1] = f"Sum of {num_cut} other SNPs"
 
     row_height = 0.4
     if plot_size == "auto":
@@ -428,6 +428,14 @@ def beeswarm(
 
             # plot the nan fvalues in the interaction feature as grey
             nan_mask = np.isnan(fvalues)
+
+            # Use specific colours for 0,0.5 and 1 values 
+            colormask_0 = (fvalues == 0) & ~nan_mask
+            colormask_05 = (fvalues == 0.5) & ~nan_mask
+            colormask_1 = (fvalues == 1) & ~nan_mask
+            colormask_other = ~(colormask_0 | colormask_05 | colormask_1 | nan_mask)
+
+            # Color for NaN
             ax.scatter(
                 shaps[nan_mask],
                 pos + ys[nan_mask],
@@ -440,14 +448,16 @@ def beeswarm(
             )
 
             # plot the non-nan fvalues colored by the trimmed feature value
-            cvals = fvalues[np.invert(nan_mask)].astype(np.float64)
+            cvals = fvalues[colormask_other].astype(np.float64)
             cvals_imp = cvals.copy()
             cvals_imp[np.isnan(cvals)] = (vmin + vmax) / 2.0
             cvals[cvals_imp > vmax] = vmax
             cvals[cvals_imp < vmin] = vmin
+
+            # Color for other
             ax.scatter(
-                shaps[np.invert(nan_mask)],
-                pos + ys[np.invert(nan_mask)],
+                shaps[colormask_other],
+                pos + ys[np.invert(colormask_other)],
                 cmap=color,
                 vmin=vmin,
                 vmax=vmax,
@@ -458,6 +468,12 @@ def beeswarm(
                 zorder=3,
                 rasterized=len(shaps) > 500,
             )
+
+            # Color for specific values
+            pl.scatter(shaps[colormask_0], pos + ys[colormask_0], color='dodgerblue', s=s, alpha=alpha, linewidth=0, zorder=3, rasterized=len(shaps) > 500)
+            pl.scatter(shaps[colormask_05], pos + ys[colormask_05], color='purple', s=s, alpha=alpha, linewidth=0, zorder=3, rasterized=len(shaps) > 500)
+            pl.scatter(shaps[colormask_1], pos + ys[colormask_1], color='red', s=s, alpha=alpha, linewidth=0, zorder=3, rasterized=len(shaps) > 500)
+
         else:
             if safe_isinstance(color, "matplotlib.colors.Colormap") and hasattr(color, "colors"):
                 color = color.colors
