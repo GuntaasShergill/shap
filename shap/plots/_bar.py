@@ -234,11 +234,11 @@ def bar(
     yticklabels = []
     for i in feature_inds:
         if features is not None and show_data:
-            yticklabels.append(format_value(features[i], "%0.03f") + " = " + feature_names[i])
+            yticklabels.append(format_value(features[i], "%0.03e") + " = " + feature_names[i])
         else:
             yticklabels.append(feature_names[i])
     if num_features < len(values[0]):
-        yticklabels[-1] = f"Sum of {num_cut} other features"
+        yticklabels[-1] = f"Sum of {num_cut} other SNPs"
 
     if ax is None:
         ax = pl.gca()
