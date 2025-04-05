@@ -457,7 +457,7 @@ def beeswarm(
             # Color for other
             ax.scatter(
                 shaps[colormask_other],
-                pos + ys[np.invert(colormask_other)],
+                pos + ys[colormask_other],
                 cmap=color,
                 vmin=vmin,
                 vmax=vmax,
